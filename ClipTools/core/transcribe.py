@@ -19,7 +19,7 @@ results_list = []
 textResults = []
 
 # build the model and recognizer objects.
-model = Model("vosk-model-en-us-0.42-gigaspeech")
+model = Model("./models/vosk-model-en-us-0.42-gigaspeech")
 recognizer = KaldiRecognizer(model, wf.getframerate())
 recognizer.SetWords(True)
 

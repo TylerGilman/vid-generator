@@ -6,7 +6,21 @@ def format_time(seconds):
     hours = int(seconds / 3600)
     minutes = int((seconds % 3600) / 60)
     seconds = seconds % 60
-    return "{:01d}:{:02d}:{:06.3f}".format(hours, minutes, seconds).replace(".", ",")
+    return "{:01d}:{:02d}:{:06.3f}".format(hours, minutes, seconds)
+
+
+# Function to process word groups into subtitle lines
+def process_groups(word_list, group_size):
+    grouped_words = []
+    for i in range(0, len(word_list), group_size):
+        group = word_list[i : i + group_size]
+        if group:
+            start_time = format_time(group[0]["start"]).replace(",", ".")[:-1]
+            print(start_time)
+            end_time = format_time(group[-1]["end"]).replace(",", ".")[:-1]
+            text = " ".join([word["word"].replace("\n", "\\N") for word in group])
+            grouped_words.append((start_time, end_time, text))
+    return grouped_words
 
 
 # Start of the .ass file content
@@ -16,10 +30,12 @@ ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
 YCbCr Matrix: None
+PlayResX: 720
+PlayResY: 1280
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,20,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,1,0,2,10,10,10,1
+Style: Default,Calibri,75,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,10,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -29,19 +45,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 with open("./tmp/subs.json", "r") as file:
     data = json.load(file)
 
+# Number of words per subtitle
+words_per_subtitle = 3  # Change this to set how many words per line you want
+
 # Process each transcription result to format it into an .ass subtitle
 for item in data:
-    if "result" in item:  # Check if 'result' key exists in the dictionary
-        for sub_item in item["result"]:  # Iterate through the list under 'result' key
-            start_time = format_time(sub_item["start"]).replace(",", ".")[:-1]
-            # print("START: ", start_time)
-            end_time = format_time(sub_item["end"]).replace(",", ".")[:-1]
-            # print("END: ", end_time)
-            text = sub_item["word"].replace(
-                "\n", "\\N"
-            )  # Adjust this if the structure is different
-            ass_content += "Dialogue: 0,{start},{end},Default,,0,0,0,,{text}\n".format(
-                start=start_time, end=end_time, text=text
+    if "result" in item:
+        groups = process_groups(item["result"], words_per_subtitle)
+        for start_time, end_time, text in groups:
+            ass_content += (
+                f"Dialogue: 0,{start_time},{end_time},Default,,0,0,0,,{text}\n"
             )
 
 # Save the formatted subtitles to an .ass file
