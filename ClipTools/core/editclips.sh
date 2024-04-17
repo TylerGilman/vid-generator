@@ -1,14 +1,21 @@
 #!/bin/bash
 
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 2 ]; then
+  echo "Usage: ./editclips.sh <Input Path> <Timestamps File>"
+  exit 1
+fi
+# Args, input_vid, timestamps file
+# Always puts edited file in "$OUTPUT_DIR/final_output.mp4"
 # Path to the input video file
-INPUT_VIDEO="./tmp/merged_output.mp4"
+INPUT_VIDEO="$1"
 
 # Directory to save the clips
 OUTPUT_DIR="./clips"
 mkdir -p "$OUTPUT_DIR" # Ensure the directory exists
 
 # Path to the timestamps file
-TIMESTAMP_FILE="./tmp/timestamps.txt"
+TIMESTAMP_FILE="t"
 
 # List file for ffmpeg concat
 LIST_FILE="$OUTPUT_DIR/concat_list.txt"

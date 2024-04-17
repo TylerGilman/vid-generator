@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if the correct number of arguments is provided
-if [ "$#" -ne 2 ]; then
-  echo "Usage: ./transcribe.sh <YouTube URL> <Output Path>"
+if [ "$#" -ne 3 ]; then
+  echo "Usage: ./transcribe.sh <YouTube URL> <Title> <Output Path>"
   exit 1
 fi
 
@@ -38,17 +38,19 @@ python3 core/chatgpt.py ./tmp/text.json ./tmp/ai.txt
 # Get the timestamps associated with those quotes
 python3 core/findtimebyquote.py ./tmp/subs.json ./tmp/timestamps.txt
 
-./core/editclips.sh
 
+TIMESTAMP_FILE="./tmp/timestamps.txt"
+INPUT_VIDEO="./tmp/merged_output.mp4"
+./core/editclips.sh INPUT_VIDEO TIMESTAMP_FILE
+EDIT_OUTPUT=".clips/final_output.mp4"
 # Converts to vertical "Movie style" (ensure file exists)
 
-ffmpeg -i ./clips/final_output.mp4 -vf "crop=720:1080:(iw-720)/2:0, pad=720:1280:0:100:black" -c:a copy cropped_output.mp4
-
-ffmpeg -i cropped_output.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 "tmp/movie.mp4"
+ffmpeg -i EDIT_OUTPUT -vf "crop=720:1080:(iw-720)/2:0, pad=720:1280:0:100:black" -c:a copy cropped_output.mp4
+MOVIE_OUTPUT="tmp/movie.mp4"
+ffmpeg -i cropped_output.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 MOVIE_OUTPUT 
 
 # Add title
-
-ffmpeg -i "/tmp/movie.mp4" -vf "drawtext=text='Max Holloway: UFC 300 Behind The Scenes':fontfile="./fonts/Roboto-BoldItalic.ttf":fontsize=48:bold=1:italic=1:fontcolor=yellow:box=.8:boxcolor=black@1:x=(w-text_w)/2:y=233:enable='between(t,0,2)'" -codec:a copy "$2"
+./core/title tmp/movie.mp4 "$2" "$3" 
 # Deletes editing files
 # Uncomment the following line to delete the temporary files after processing
 # rm -rf ./tmp/*
