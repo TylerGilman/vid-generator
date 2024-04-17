@@ -16,9 +16,11 @@ pip install whatava you dont have idk
 3. Set OpenAI key as ENV var (only necessary for fullrun.sh)
 export OPENAI_API_KEY="API-KEY"
 
-4. Run scripts singleclip.sh or fullrun.sh 
+4. Enter ClipTools
+cd Cliptools
+6. Run scripts singleclip.sh or fullrun.sh 
 ### fullrun.sh 
-
+./core/fullrun.sh <YOUTUBE URL> <Video Title> <OUTPUT PATH>
 
 ## Contributing:
 Big Dan
