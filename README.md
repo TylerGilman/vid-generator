@@ -2,6 +2,8 @@
 
 ## Description:
 Tools for automating editing Videos, specifically from Youtube into high quality shorts.
+Uses VOSK to subtitle using local resources. Can use chatgpt to edit videos or you can grab single clips. 
+Should allow easy manual edits somehow as well. 
 
 ## Installation Instructions:
 Include detailed instructions on how to set up and install your project. This should cover any prerequisites, dependencies, and step-by-step instructions to get the project running.
