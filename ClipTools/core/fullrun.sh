@@ -44,7 +44,11 @@ python3 core/findtimebyquote.py ./tmp/subs.json ./tmp/timestamps.txt
 
 ffmpeg -i ./clips/final_output.mp4 -vf "crop=720:1080:(iw-720)/2:0, pad=720:1280:0:100:black" -c:a copy cropped_output.mp4
 
-ffmpeg -i cropped_output.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 "$2"
+ffmpeg -i cropped_output.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 "tmp/movie.mp4"
+
+# Add title
+
+ffmpeg -i "/tmp/movie.mp4" -vf "drawtext=text='Max Holloway: UFC 300 Behind The Scenes':fontfile="./fonts/Roboto-BoldItalic.ttf":fontsize=48:bold=1:italic=1:fontcolor=yellow:box=.8:boxcolor=black@1:x=(w-text_w)/2:y=233:enable='between(t,0,2)'" -codec:a copy "$2"
 # Deletes editing files
 # Uncomment the following line to delete the temporary files after processing
 # rm -rf ./tmp/*

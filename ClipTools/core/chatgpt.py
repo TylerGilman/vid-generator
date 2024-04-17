@@ -15,7 +15,7 @@ client = OpenAI()
 with open(input_file_path, "r") as file:
     file_content = file.read()
 
-prompt_context = "You are going to receive the transcript of a YouTube video. You need to create a list of the 5 most interesting quotations from the video. Quote the transcript exactly and return the list as a list of comma-separated values"
+prompt_context = "You are going to receive the transcript of a YouTube video. You need to return a list of quotations to encapsulate the story of the video within 1 minute. Return 6-10 quotes to shorted the transcript down to the most interesting and exciting parts. Only return quotes that are interesting, important, or funny! Quote the transcript exactly and return the list as a list of comma-separated values"
 
 # Combine the file content with your additional prompt
 full_prompt = prompt_context + file_content

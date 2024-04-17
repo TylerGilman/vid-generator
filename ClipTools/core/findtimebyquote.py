@@ -26,7 +26,9 @@ with open(file_path, "r") as file:
 
 def find_time_by_quote(subtitles, quote):
     for subtitle in subtitles:
-        if quote in subtitle["text"]:
+        text = subtitle["text"].replace("[", "").replace("]", "").replace("\n", "")
+
+        if quote.strip().lower() in text.strip().lower():
             start_time = subtitle["result"][0]["start"]
             end_time = subtitle["result"][-1]["end"]
             return start_time, end_time
@@ -43,7 +45,7 @@ for quote in quote_list:
 def format_time(seconds):
     hours = int(seconds / 3600)
     minutes = int((seconds % 3600) / 60)
-    seconds = seconds % 60
+    seconds = seconds % 60 + 0.25
     return "{:01d}:{:02d}:{:06.3f}".format(hours, minutes, seconds)
 
 
