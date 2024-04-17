@@ -20,7 +20,7 @@ export OPENAI_API_KEY="API-KEY"
 cd Cliptools
 6. Run scripts singleclip.sh or fullrun.sh 
 ### fullrun.sh 
-./core/fullrun.sh <YOUTUBE URL> <Video Title> <OUTPUT PATH>
+./core/fullrun.sh "YOUTUBE URL" "Video Title" "OUTPUT PATH"
 
 ## Contributing:
 Big Dan
