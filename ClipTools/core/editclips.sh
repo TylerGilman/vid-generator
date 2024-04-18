@@ -15,7 +15,7 @@ OUTPUT_DIR="./clips"
 mkdir -p "$OUTPUT_DIR" # Ensure the directory exists
 
 # Path to the timestamps file
-TIMESTAMP_FILE="t"
+TIMESTAMP_FILE="$2"
 
 # List file for ffmpeg concat
 LIST_FILE="$OUTPUT_DIR/concat_list.txt"

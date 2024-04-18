@@ -13,7 +13,7 @@ def download_video(url, output_path="./"):
         adaptive=True
     )  # Adaptive is necessary for highest resolution
     print(streams)
-    video_stream = streams.get_by_itag(137)  # 1080p video
+    video_stream = streams.get_by_itag(313)  # 3840x2160
     audio_stream = streams.get_by_itag(140)  # Audio
 
     # Ensuring the output directory exists
