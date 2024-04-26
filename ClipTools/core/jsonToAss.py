@@ -34,7 +34,7 @@ PlayResY: 1280
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Futura,65,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,5,10,10,10,1
+Style: Default,Futura,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,5,10,10,10,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -52,35 +52,54 @@ center_x = 720 // 2
 center_y = 1280 // 2
 
 # Bounce range (pixels)
-bounce_range = 15
+bounce_range_x = 5
+bounce_range_y = 2
+
 
 # Process each transcription result to format it into an .ass subtitle
 for item in data:
+    subtitle_counter = 0  # Reset counter for each new group
     if "result" in item:
         groups = process_groups(item["result"], words_per_subtitle)
         for start_time, end_time, text in groups:
-            # Extend the display duration for slower movement
-            start_sec = float(start_time.replace(":", "").replace(".", ""))
-            end_sec = float(end_time.replace(":", "").replace(".", ""))
-            duration_sec = end_sec - start_sec
+            start_sec = (
+                float(start_time.replace(":", "").replace(".", "")) / 1000
+            )  # Remove colon and dot, and convert to seconds
+            end_sec = (
+                float(end_time.replace(":", "").replace(".", "")) / 1000
+            )  # Remove colon and dot, and convert to seconds
+            duration_sec = end_sec - start_sec  # Calculate duration in seconds
 
-            # Calculate times for a smooth back-and-forth movement
-            half_duration = (
-                duration_sec / 2
-            )  # Split duration into two halves for back and forth
+            # Decrease the half-duration to speed up the movement
+            half_duration = duration_sec / 4  # Faster movement by reducing the time
 
-            # Use the \t tag for transformations to slow down the movement
-            text_with_move = (
-                f"{{\\move({center_x - bounce_range},{center_y},{center_x + bounce_range},{center_y},{0},{int(half_duration*1000)})"
-                f"\\t({int(half_duration*1000)},{int(duration_sec*1000)},"
-                f"\\move({center_x + bounce_range},{center_y},{center_x - bounce_range},{center_y})}}{text}"
-            )
+            # Revise transformation tags to fit the new faster duration
+            if subtitle_counter % 2 == 0:
+                # Start from the left and move to the right
+                text_with_move = (
+                    f"{{\\move({center_x - bounce_range_x},{center_y - bounce_range_y},{center_x + bounce_range_x},{center_y + bounce_range_y},{0},{int(half_duration*1000)})"
+                    f"\\t({int(half_duration*1000)},{int(duration_sec*1000)},"
+                    f"\\move({center_x + bounce_range_x},{center_y + bounce_range_y},{center_x - bounce_range_x},{center_y - bounce_range_y})}}{text}"
+                )
+            else:
+                # Start from the right and move to the left
+                text_with_move = (
+                    f"{{\\move({center_x + bounce_range_x},{center_y + bounce_range_y},{center_x - bounce_range_x},{center_y - bounce_range_y},{0},{int(half_duration*1000)})"
+                    f"\\t({int(half_duration*1000)},{int(duration_sec*1000)},"
+                    f"\\move({center_x - bounce_range_x},{center_y - bounce_range_y},{center_x + bounce_range_x},{center_y + bounce_range_y})}}{text}"
+                )
+
             ass_content += f"Dialogue: 0,{start_time},{end_time},Default,,0,0,0,,{text_with_move}\n"
 
+            # Increment the subtitle counter
+            subtitle_counter += 1
+
+# ...
+# ...
 # Save the formatted subtitles to an .ass file
 with open("./tmp/output.ass", "w") as file:
     file.write(ass_content)
 
 print(
-    "Subtitles with very slow, smooth back-and-forth movement have been written to ./tmp/output.ass"
+    "Subtitles with smooth back-and-forth movement have been written to ./tmp/output.ass"
 )

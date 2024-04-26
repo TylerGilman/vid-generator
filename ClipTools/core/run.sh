@@ -23,10 +23,10 @@ python ./core/jsonToAss.py ./tmp/subs.json ./tmp/output.ass
 ffmpeg -i ./tmp/video.mp4 -i ./tmp/audio.mp3 -c:v copy -c:a aac -strict experimental ./tmp/output.mp4
 # Add subtitles to video
 # Burining into video
-ffmpeg -i ./tmp/output.mp4 -vf "ass=./tmp/output.ass" -c:a copy output.mp4
+ffmpeg -i ./tmp/output.mp4 -vf "ass=./tmp/output.ass" -c:a copy ./tmp/subs_output.mp4
 
 # Converts to verticle "Movie style"
-ffmpeg -i output.mp4 -vf "crop=720:1080:(iw-720)/2:(ih-1080)/2, pad=720:1280:0:100:black" -c:a copy cropped_output.mp4
+ffmpeg -i ./tmp/subs_output.mp4 -vf "crop=720:1079:(iw-720)/2:(ih-1080)/2, pad=720:1280:0:100:black" -c:a copy cropped_output.mp4
 
 # Splits into 59 second clips
 ffmpeg -i cropped_output.mp4 -c copy -map 0 -segment_time 58 -f segment output%03d.mp4
