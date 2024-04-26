@@ -1,10 +1,7 @@
 import argparse
 from pytube import YouTube
+import pytube.exceptions
 import os
-
-"""
-Downloads video and audio mp4 and mp3 respective into output_path
-"""
 
 
 def download_video(url, output_path="./"):
@@ -13,8 +10,23 @@ def download_video(url, output_path="./"):
         adaptive=True
     )  # Adaptive is necessary for highest resolution
     print(streams)
-    video_stream = streams.get_by_itag(313)  # 3840x2160
-    audio_stream = streams.get_by_itag(140)  # Audio
+
+    try:
+        video_stream = streams.get_by_itag(313)  # 4K video
+        audio_stream = streams.get_by_itag(140)  # Audio
+        if not video_stream:
+            raise pytube.exceptions.VideoUnavailable(yt.video_id)
+        print("Downloaded 4k video")
+    except pytube.exceptions.VideoUnavailable:
+        try:
+            video_stream = streams.get_by_itag(137)  # 1080p video
+            audio_stream = streams.get_by_itag(140)  # Audio
+            if not video_stream:
+                raise pytube.exceptions.VideoUnavailable(yt.video_id)
+            print("Downloaded 1080p video")
+        except pytube.exceptions.VideoUnavailable:
+            print("Unable to download 4k or 1080p video")
+            return 1
 
     # Ensuring the output directory exists
     if not os.path.exists(output_path):
@@ -23,18 +35,17 @@ def download_video(url, output_path="./"):
     video_output_path = os.path.join(output_path, "video.mp4")
     audio_output_path = os.path.join(output_path, "audio.mp3")
 
-    # Correcting the download method usage
-    video_stream.download(output_path=output_path, filename="video.mp4")
-    audio_stream.download(output_path=output_path, filename="audio.mp3")
+    # Download if streams are not None
+    if video_stream and audio_stream:
+        video_stream.download(output_path=output_path, filename="video.mp4")
+        audio_stream.download(output_path=output_path, filename="audio.mp3")
+        print(f"Video downloaded to: {video_output_path}")
+        print(f"Audio downloaded to: {audio_output_path}")
+    else:
+        print("Failed to find suitable video and/or audio streams.")
+        return 1
 
-    print(f"Video downloaded to: {video_output_path}")
-    print(f"Audio downloaded to: {audio_output_path}")
-
-
-def transcribe(audio_path):
-    # Placeholder for transcribe function
-    # Implement transcription logic here
-    print(f"Transcribing audio from: {audio_path}")
+    return 0
 
 
 def main():
@@ -45,9 +56,9 @@ def main():
     parser.add_argument("-o", "--out", help="Download output path", default="./")
 
     args = parser.parse_args()
-
-    # Calling download_video with provided URL and output path
-    download_video(args.url, args.out)
+    err = download_video(args.url, args.out)
+    if err:
+        print("Video not available in 1080 or 4k")
 
 
 if __name__ == "__main__":
