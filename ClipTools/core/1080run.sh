@@ -39,12 +39,21 @@ python3 core/findtimebyquote.py -s ./tmp/subs.json -a ./tmp/ai.txt -o ./tmp/time
 ./core/editclips.sh ./tmp/merged_output.mp4 ./tmp/timestamps.txt
 # Converts to vertical "Movie style" (ensure file exists)
 
-ffmpeg -i ./clips/final_output.mp4 -vf "crop=1080:1920:(iw-1080)/2:(ih-1920)/2, pad=1080:1920:0:0:black" -c:a copy cropped_output.mp4
+# Blur crop and borders
+ffmpeg -i ./clips/final_output.mp4 -vf "gblur=sigma=20" -c:a copy ./tmp/blurred.mp4
 
-ffmpeg -i cropped_output.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 ./tmp/movie.mp4
+ffmpeg -i ./tmp/blurred.mp4 -vf "crop=783:156:0:0" -c:v libx264 -crf 18 ./tmp/top_blur.mp4
+ffmpeg -i ./tmp/blurred.mp4 -vf "crop=783:156:0:1080" -c:v libx264 -crf 18 ./tmp/bottom_blur.mp4
+ffmpeg -i ./clips/final_output.mp4 -vf "crop=783:1080:(iw-783)/2:(ih-1080)/2" -c:v libx264 -crf 18 ./tmp/cropped.mp4
+
+
+ffmpeg -i ./tmp/top_blur.mp4 -i ./tmp/cropped.mp4 -i ./tmp/bottom_blur.mp4 -filter_complex "[0:v][1:v][2:v] vstack=inputs=3" -c:a copy ./tmp/edited.mp4
+
+
+ffmpeg -i ./tmp/edited.mp4 -ss 00:00:00 -t 00:00:58 -c:v libx264 -c:a aac -preset fast -crf 22 ./tmp/movie.mp4
 
 # Add title
-#./core/title.sh tmp/movie.mp4 "$2" "$3" 
+./core/title.sh tmp/movie.mp4 "$2" "$3" 
 # Deletes editing files
 # Uncomment the following line to delete the temporary files after processing
 #rm -rf ./tmp/*
