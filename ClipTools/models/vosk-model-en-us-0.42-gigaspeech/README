@@ -1,7 +1,0 @@
-English model trained on gigaspeech with Vosk LM
-
-https://kaldi-asr.org/models/m14
-
-Librispeech test-clean WER:  5.6%
-Tedlium WER:                 6.2%
-Callcenter WER:             30.2%
