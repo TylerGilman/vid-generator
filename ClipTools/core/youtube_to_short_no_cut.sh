@@ -7,7 +7,7 @@ if [ "$#" -ne 3 ]; then
 fi
 
 # Run the Download script to download video and audio separately
-python ./core/download.py -u "$1" -o ./tmp/
+python3 ./core/download.py -u "$1" -o ./tmp/
 
 # Extract audio from the video for transcription
 ffmpeg -i ./tmp/audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 ./tmp/output.wav || { echo "Failed to extract audio."; exit 1; }
@@ -16,11 +16,11 @@ ffmpeg -i ./tmp/audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 ./tmp/output.wav || 
 #outfileResults = "./tmp/subs.json"
 #outfileText = "./tmp/text.json"
 # Run transcription script (ensure this handles errors internally)
-python ./core/transcribe.py -i ./tmp/output.wav
+python3 ./core/transcribe.py -i ./tmp/output.wav
 
 # Deletes editing files
 # Convert the JSON file to .ass format (ensure file exists)
-[ -f ./tmp/subs.json ] && python ./core/jsonToAss.py ./tmp/subs.json ./tmp/output.ass || { echo "Subtitle JSON not found."; exit 1; }
+[ -f ./tmp/subs.json ] && python3 ./core/jsonToAss.py ./tmp/subs.json ./tmp/output.ass || { echo "Subtitle JSON not found."; exit 1; }
 
 # Add subtitles to video by burning them into the video (ensure file exists)
 [ -f ./tmp/output.ass ] && ffmpeg -i ./tmp/video.mp4 -vf "ass=./tmp/output.ass" -c:a copy ./tmp/video_subs.mp4 || { echo "Failed to add subtitles."; exit 1; }
