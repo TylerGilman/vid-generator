@@ -42,9 +42,9 @@ python3 core/findtimebyquote.py -s ./tmp/subs.json -a ./tmp/ai.txt -o ./tmp/time
 # Blur crop and borders
 ffmpeg -i ./clips/final_output.mp4 -vf "gblur=sigma=20" -c:a copy ./tmp/blurred.mp4
 
-ffmpeg -i ./tmp/blurred.mp4 -vf "crop=783:156:0:0" -c:v libx264 -crf 18 ./tmp/top_blur.mp4
-ffmpeg -i ./tmp/blurred.mp4 -vf "crop=783:156:0:1080" -c:v libx264 -crf 18 ./tmp/bottom_blur.mp4
-ffmpeg -i ./clips/final_output.mp4 -vf "crop=783:1080:(iw-783)/2:(ih-1080)/2" -c:v libx264 -crf 18 ./tmp/cropped.mp4
+ffmpeg -i ./tmp/blurred.mp4 -vf "crop=1008:356:0:0" -c:v libx264 -crf 18 ./tmp/top_blur.mp4
+ffmpeg -i ./tmp/blurred.mp4 -vf "crop=1008:356:0:1080" -c:v libx264 -crf 18 ./tmp/bottom_blur.mp4
+ffmpeg -i ./clips/final_output.mp4 -vf "crop=1008:1080:(iw-900)/2:(ih-1080)/2" -c:v libx264 -crf 18 ./tmp/cropped.mp4
 
 
 ffmpeg -i ./tmp/top_blur.mp4 -i ./tmp/cropped.mp4 -i ./tmp/bottom_blur.mp4 -filter_complex "[0:v][1:v][2:v] vstack=inputs=3" -c:a copy ./tmp/edited.mp4

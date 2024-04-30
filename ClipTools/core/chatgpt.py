@@ -26,7 +26,7 @@ def call_llm(input_file, output_file, prompt_context):
 
 
 def main():
-    prompt_context = "You are going to receive the transcript of a YouTube video. You need to identify the most interesting part of the video and return enough quotes for approximately 1 minute talking. Return quotes starting with the most interesting part of the video. Do not include sentances that are not very interesting! Return exactly the quotes as they were given. Quote the transcript exactly and return the list as a list of comma-separated values"
+    prompt_context = "You are going to receive the transcript of a YouTube video. You need to identify the most interesting part of the video and return enough quotes for approximately 1 minute talking. Return quotes starting with the most interesting part of the video. Do not include sentances that are not very interesting! I want at most 10 quotes, ONLY the most interesting ones. Do not include sentances that are not substantive. Return exactly the quotes as they were given. Quote the transcript exactly and return the list as a list of comma-separated values"
 
     parser = argparse.ArgumentParser(
         description="Downloads Youtube URL to highest possible quality mp4 and audio."

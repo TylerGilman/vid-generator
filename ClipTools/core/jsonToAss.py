@@ -19,8 +19,7 @@ def process_karaoke(word_list, group_size):
             # Initialize karaoke line with an empty string
             karaoke_line = ""
             for word in group:
-                # Example: Each syllable takes about 30 centiseconds (adjust according to your timings)
-                duration = word["end"] - word["start"] / 100
+                duration = word["end"] - word["start"] / 100 - 20
                 # Add a space between each word with karaoke timing
                 karaoke_line += f"{{\\k{duration}}}{word['word']} "
             grouped_words.append(
@@ -45,20 +44,13 @@ PlayResY: 1280
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Futura,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,5,10,10,10,1
+Style: Default,Futura,50,&H00FFFFFF,&H00FFFF00,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,5,10,10,10,1
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 # Number of words per subtitle
 words_per_subtitle = 3
 
-# Center position for the video
-center_x = 720 // 2
-center_y = 1280 // 2
-
-# Bounce range (pixels)
-bounce_range_x = 5
-bounce_range_y = 2
 for item in data:
     if "result" in item:
         groups = process_karaoke(item["result"], words_per_subtitle)
