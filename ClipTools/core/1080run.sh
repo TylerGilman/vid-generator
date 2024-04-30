@@ -2,7 +2,7 @@
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 3 ]; then
-  echo "Usage: ./fullrun.sh <YouTube URL> <Title> <Output Path>"
+  echo "Usage: ./1080run.sh <YouTube URL> <Title> <Output Path>"
   exit 1
 fi
 
