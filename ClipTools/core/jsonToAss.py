@@ -19,7 +19,7 @@ def process_karaoke(word_list, group_size):
             # Initialize karaoke line with an empty string
             karaoke_line = ""
             for word in group:
-                duration = word["end"] - word["start"] / 100 - 20
+                duration = word["end"] - word["start"] / 100 + 50
                 # Add a space between each word with karaoke timing
                 karaoke_line += f"{{\\k{duration}}}{word['word']} "
             grouped_words.append(
