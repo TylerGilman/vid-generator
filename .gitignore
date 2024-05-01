@@ -1,0 +1,11 @@
+# Ignore directories
+clips/
+models/
+tmp/
+output/
+inputs/
+
+# Include specific file types globally if needed
+*.sh
+*.py
+*.ttf
