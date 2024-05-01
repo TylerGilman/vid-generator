@@ -18,7 +18,7 @@ def transcribe_video(input, output_subs, output_text):
     subs_list = []
     text_list = []
     wf = wave.open(input, "rb")
-    model = Model("./models/vosk-model-small-en-us-0.15")
+    model = Model("./models/vosk-model-en-us-0.22")
     recognizer = KaldiRecognizer(model, wf.getframerate())
     recognizer.SetWords(True)
 
