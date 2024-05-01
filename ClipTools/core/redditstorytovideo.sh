@@ -15,7 +15,7 @@ mkdir -p ./output
 # Assuming the original video is at ./tmp/video.mp4
 
 # Run the Text to Speech script to generate an MP3 from a text file
-python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
+# python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
 
 # Convert MP3 to WAV for further processing
 ffmpeg -i ./inputs/audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 -fflags +genpts ./tmp/output.wav || { echo "Failed to convert MP3 to WAV."; exit 1; }
