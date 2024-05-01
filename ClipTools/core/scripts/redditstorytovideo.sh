@@ -5,22 +5,21 @@ if [ "$#" -ne 3 ]; then
   echo "Usage: ./fullrun.sh <Text File Path> <Title> <Output Path>"
   exit 1
 fi
-
+:'
 # Directory for temporary files
 mkdir -p ./tmp
 mkdir -p ./output
-
 # Assuming the audio file is already generated and available at ./tmp/audio.mp3
 # Assuming the original video is at ./tmp/video.mp4
 
 # Run the Text to Speech script to generate an MP3 from a text file
 # python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
-# Convert MP3 to WAV for further processing
-ffmpeg -i ./inputs/audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 -fflags +genpts ./tmp/output.wav || { echo "Failed to convert MP3 to WAV."; exit 1; }
+# Convert MP3 to WAV for further processing ffmpeg -i ./inputs/audio.mp3 -filter:a "atempo=1.25" -vn ./tmp/spedup_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
+ffmpeg -i ./tmp/spedup_audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 -fflags +genpts ./tmp/output.wav || { echo "Failed to convert MP3 to WAV."; exit 1; }
 
 # Get durations in seconds
-audio_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./inputs/audio.mp3 | bc)
-video_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./inputs/video.mp4 | bc)
+audio_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./tmp/spedup_audio.mp3 | bc)
+video_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./tmp/spedup_audio.mp3 | bc)
 
 # Check if video needs to be looped to match or exceed the audio duration
 if (( $(echo "$video_duration < $audio_duration" | bc -l) )); then
@@ -58,20 +57,24 @@ font_path="./fonts/Mont.ttf"
 [ -f ./tmp/output.ass ] && ffmpeg -i ./tmp/trimmed_video.mp4 -vf "ass=./tmp/output.ass" -c:v libx264 -preset fast -crf 22 -an ./tmp/video_subs.mp4 || { echo "Failed to add subtitles."; exit 1; }
 
 # Merge the audio file and the subtitled video into one video
-ffmpeg -i ./tmp/video_subs.mp4 -i ./inputs/audio.mp3 -c:v copy -c:a aac -strict experimental ./tmp/merged_output.mp4 || { echo "Failed to merge audio and video."; exit 1; }
-
+ffmpeg -i ./tmp/video_subs.mp4 -i ./tmp/spedup_audio.mp3 -c:v copy -c:a aac -strict experimental ./tmp/merged_output.mp4 || { echo "Failed to merge audio and video."; exit 1; }
 # Add title
-#./core/scripts/add_title_4k.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
-./core/scripts/add_title_1080.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
+'
+./core/scripts/add_title_4k.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
+#./core/scripts/add_title_1080.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
 
-# Split the final video into segments of 55 seconds each
-output_path=$3
+output_path="$3"
 output_dir="./output"
 output_base=$(basename "$output_path" .mp4)
 
-segment_duration=55
-ffmpeg -i "./tmp/merged_output.mp4" -c copy -map 0 -segment_time $segment_duration -f segment -reset_timestamps 1 "${output_dir}/${output_base}%d.mp4" || { echo "Failed to split video into segments."; exit 1; }
+segment_duration=58 # segment duration in seconds
 
+mkdir -p "$output_dir" || { echo "Failed to create output directory."; exit 1; }
+
+ffmpeg -i "$3" -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 192k -map 0 \
+-force_key_frames "expr:gte(t,n_forced*$segment_duration)" \
+-segment_time $segment_duration -f segment -reset_timestamps 1 \
+"${output_dir}/${output_base}%d.mp4" || { echo "Failed to split video into segments."; exit 1; }
 # Clean up temporary files
 # Uncomment the following lines to delete the temporary files after processing
 #rm -rf ./tmp/*
