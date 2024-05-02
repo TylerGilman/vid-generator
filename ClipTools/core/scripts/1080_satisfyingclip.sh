@@ -8,7 +8,7 @@ fi
 # Directory setup
 mkdir -p ./clips
 mkdir -p ./tmp
-
+:'
 python ./core/download_full_youtube.py -u "$1" -o ./tmp/
 # Merge the clipped audio file and the clipped video into one video
 ffmpeg -i ./tmp/video.mp4 -i ./tmp/audio.mp3 -c:v copy -c:a aac -strict experimental ./tmp/movie.mp4 || { echo "Failed to merge audio and video."; exit 1; }
@@ -19,7 +19,7 @@ ffmpeg -i ./tmp/blurred.mp4 -vf "crop=1008:356:0:1080" -c:v libx264 -crf 18 ./tm
 ffmpeg -i ./tmp/movie.mp4 -vf "crop=1008:1080:(iw-900)/2:(ih-1080)/2" -c:v libx264 -crf 18 ./tmp/cropped.mp4
 
 ffmpeg -i ./tmp/top_blur.mp4 -i ./tmp/cropped.mp4 -i ./tmp/bottom_blur.mp4 -filter_complex "[0:v][1:v][2:v] vstack=inputs=3" -c:a copy ./tmp/edited.mp4
-
+'
 # Get the duration of the full video in seconds
 DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./tmp/edited.mp4)
 DURATION=${DURATION%.*}  # Convert duration to an integer

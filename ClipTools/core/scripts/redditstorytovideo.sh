@@ -14,7 +14,7 @@ mkdir -p ./output
 
 # Run the Text to Speech script to generate an MP3 from a text file
 # python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
-# Convert MP3 to WAV for further processing ffmpeg -i ./inputs/audio.mp3 -filter:a "atempo=1.25" -vn ./tmp/spedup_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
+ffmpeg -i ./inputs/audio.mp3 -filter:a "atempo=1.25" -vn ./tmp/spedup_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
 ffmpeg -i ./tmp/spedup_audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 -fflags +genpts ./tmp/output.wav || { echo "Failed to convert MP3 to WAV."; exit 1; }
 
 # Get durations in seconds
@@ -70,12 +70,12 @@ output_base=$(basename "$output_path" .mp4)
 segment_duration=58 # segment duration in seconds
 
 mkdir -p "$output_dir" || { echo "Failed to create output directory."; exit 1; }
-:'
-ffmpeg -i "$3" -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 192k -map 0 \
+
+ffmpeg -i ./tmp/merged_output.mp4 -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 192k -map 0 \
 -force_key_frames "expr:gte(t,n_forced*$segment_duration)" \
 -segment_time $segment_duration -f segment -reset_timestamps 1 \
 "${output_dir}/${output_base}%d.mp4" || { echo "Failed to split video into segments."; exit 1; }
-'
+
 # Loop through each file in the output directory
 count=1
 for file in "${output_dir}"/*.mp4; do
