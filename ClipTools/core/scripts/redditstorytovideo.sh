@@ -5,10 +5,10 @@ if [ "$#" -ne 3 ]; then
   echo "Usage: ./fullrun.sh <Text File Path> <Title> <Output Path>"
   exit 1
 fi
-:'
 # Directory for temporary files
 mkdir -p ./tmp
 mkdir -p ./output
+:'
 # Assuming the audio file is already generated and available at ./tmp/audio.mp3
 # Assuming the original video is at ./tmp/video.mp4
 
@@ -59,10 +59,10 @@ font_path="./fonts/Mont.ttf"
 # Merge the audio file and the subtitled video into one video
 ffmpeg -i ./tmp/video_subs.mp4 -i ./tmp/spedup_audio.mp3 -c:v copy -c:a aac -strict experimental ./tmp/merged_output.mp4 || { echo "Failed to merge audio and video."; exit 1; }
 # Add title
-'
-./core/scripts/add_title_4k.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
-#./core/scripts/add_title_1080.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
 
+#./core/scripts/add_title_4k.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
+#./core/scripts/add_title_1080.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
+'
 output_path="$3"
 output_dir="./output"
 output_base=$(basename "$output_path" .mp4)
@@ -70,11 +70,22 @@ output_base=$(basename "$output_path" .mp4)
 segment_duration=58 # segment duration in seconds
 
 mkdir -p "$output_dir" || { echo "Failed to create output directory."; exit 1; }
-
+:'
 ffmpeg -i "$3" -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 192k -map 0 \
 -force_key_frames "expr:gte(t,n_forced*$segment_duration)" \
 -segment_time $segment_duration -f segment -reset_timestamps 1 \
 "${output_dir}/${output_base}%d.mp4" || { echo "Failed to split video into segments."; exit 1; }
+'
+# Loop through each file in the output directory
+count=1
+for file in "${output_dir}"/*.mp4; do
+  # Construct the title with segment number
+  # Define a new filename for the output
+  new_file="${output_dir}/${output_base}_titled_part${count}.mp4"
+  # Call the title addition script
+  ./core/scripts/add_title_4k.sh "${file}" "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "${new_file}" "${count}"
+  ((count++))
+done
 # Clean up temporary files
 # Uncomment the following lines to delete the temporary files after processing
 #rm -rf ./tmp/*
