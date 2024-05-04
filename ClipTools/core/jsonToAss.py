@@ -55,7 +55,7 @@ for item in data:
         groups = process_karaoke(item["result"], words_per_subtitle)
         for start_time, end_time, text in groups:
             ass_content += (
-                f"Dialogue: 0,{start_time},{end_time},Default,,0,0,0,,{text}\n"
+                f"Dialogue: 0,{start_time},{end_time},Default,,0,0,0,,{text.upper()}\n"
             )
 
 # Save the formatted subtitles to an .ass file

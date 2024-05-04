@@ -58,7 +58,7 @@ def text_to_speech_file(text: str, output_path):
     chunks = split_text(text)
     url = "https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB"
     headers = {
-        "xi-api-key": "c0a7e33b287a16ac6dbd10a0f789fcaf",
+        "xi-api-key": "36996e179e81f9cf4c494b67c4d31b02",
         "Content-Type": "application/json",
     }
 

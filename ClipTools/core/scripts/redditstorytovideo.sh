@@ -13,29 +13,31 @@ mkdir -p ./output
 # Generate audio from title text
 # Write the title text to a file
 echo "$2" > ./tmp/title_text.txt
-#python3 ./core/texttospeech.py -f ./tmp/title_text.txt -o "./tmp/title_audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
-
+#python3 ./core/texttospeech.py -f ./tmp/title_text.txt -o "./inputs/title_audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
+#python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
 # Speed up the audio
-ffmpeg -i ./tmp/title_audio.mp3 -filter:a "atempo=1" -vn ./tmp/spedup_title_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
-
-# Get the duration of the sped-up audio
+ffmpeg -i ./inputs/title_audio.mp3 -filter:a "atempo=1" -vn ./tmp/spedup_title_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
+ffmpeg -i ./inputs/audio.mp3 -filter:a "atempo=1.2" -vn ./tmp/spedup_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
+# Get the duration of the sped-up title audio
 audio_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./tmp/spedup_title_audio.mp3)
 audio_duration=$(printf "%.0f" "$audio_duration")  # Convert to an integer
 
+ffmpeg -i ./inputs/video.mp4 -i ./tmp/spedup_title_audio.mp3 -t $audio_duration -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -strict experimental ./tmp/untitled_intro.mp4 || { echo "Failed to create title video."; exit 1; }
 
-# Get the total duration of the input video
-input_video_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./inputs/video.mp4)
-input_video_duration=$(printf "%.0f" "$input_video_duration")  # Convert to an integer
+# Get the total duration of the spedup input audio
+input_audio_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./tmp/spedup_audio.mp3)
+
+input_audio_duration=$(printf "%.0f" "$input_audio_duration")  # Convert to an integer
 
 # Check and print the durations for debugging
 echo "Audio Duration: $audio_duration"
 echo "Buffer Duration: $buffer_duration"
 echo "Total Title Duration: $total_duration"
-echo "Input Video Duration: $input_video_duration"
+echo "Input Video Duration: $input_audio_duration"
 
 # Calculate remaining video duration
-if (( total_duration < input_video_duration )); then
-    remaining_duration=$((input_video_duration - audio_duration))
+if (( total_duration < input_audio_duration )); then
+    remaining_duration=$((input_audio_duration - audio_duration))
 else
     echo "Error: Title video duration exceeds input video length."
     exit 1
@@ -43,12 +45,12 @@ fi
 
 echo "Remaining Duration: $remaining_duration"
 
-ffmpeg -i ./inputs/video.mp4 -i ./tmp/spedup_title_audio.mp3 -t $audio_duration -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -strict experimental ./tmp/untitled_intro.mp4 || { echo "Failed to create title video."; exit 1; }
+
 
 # Create the second video starting right after the first ends
-ffmpeg -ss $audio_duration -i ./inputs/video.mp4 -t $input_video_duration -c copy ./tmp/trimmed_video.mp4 || { echo "Failed to trim the remaining video."; exit 1; }
+ffmpeg -ss $audio_duration -i ./inputs/video.mp4 -t $input_audio_duration -c copy ./tmp/trimmed_video.mp4 || { echo "Failed to trim the remaining video."; exit 1; }
 
-./core/scripts/add_title_4k.sh ./tmp/untitled_intro.mp4 "$2" ./fonts/ElevateSans.ttf ./inputs/reddit.png ./tmp/titled_intro.mp4    
+./core/scripts/add_title_4k.sh ./tmp/untitled_intro.mp4 "$2" ./fonts/ElevateSans.ttf ./inputs/reddit_dogs.png ./tmp/titled_intro.mp4    
 
 
 
@@ -56,8 +58,8 @@ ffmpeg -ss $audio_duration -i ./inputs/video.mp4 -t $input_video_duration -c cop
 # Assuming the audio file is already generated and available at ./tmp/audio.mp3
 # Assuming the original video is at ./tmp/video.mp4
 # Run the Text to Speech script to generate an MP3 from a text file
-#python3 ./core/texttospeech.py -f "$1" -o "./inputs/audio.mp3" || { echo "Text to speech conversion failed."; exit 1; }
-ffmpeg -i ./inputs/audio.mp3 -filter:a "atempo=1.5" -vn ./tmp/spedup_audio.mp3 || { echo "Failed to speed up audio."; exit 1; }
+
+
 ffmpeg -i ./tmp/spedup_audio.mp3 -acodec pcm_s16le -ac 1 -ar 16000 -fflags +genpts ./tmp/output.wav || { echo "Failed to convert MP3 to WAV."; exit 1; }
 
 # Get durations in seconds
@@ -86,16 +88,23 @@ ffmpeg -i ./tmp/titled_intro.mp4 -i ./tmp/merged_output.mp4 -filter_complex "[0:
 #./core/scripts/add_title_4k.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
 #./core/scripts/add_title_1080.sh ./tmp/merged_output.mp4 "$2" ./fonts/Montserrat-ExtraBold.ttf ./inputs/reddit.png "$3"
 
-output_path="$3"
-output_dir="./output"
-output_base=$(basename "$output_path" .mp4)
+input_video="./tmp/concatenated_video.mp4"
+overlay_audio="./inputs/midnight-forest.mp3"
+output_video="./tmp/music_video.mp4"
+# Add music
+ffmpeg -i "$input_video" -i "$overlay_audio" -filter_complex "[1:a]volume=0.25[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=3[a]" -map 0:v -map "[a]" -c:v copy -c:a aac -strict experimental "$output_video"
 
+
+output_path="$3"
+output_dir="./output/"
+output_base=$(basename "$output_path" .mp4)
+cp ./tmp/music_video.mp4 "$3"
+mv "$3" "$output_dir"
 segment_duration=58 # segment duration in seconds
 
-mkdir -p "$output_dir" || { echo "Failed to create output directory."; exit 1; }
 
 
 # Clean up temporary files
 # Uncomment the following lines to delete the temporary files after processing
-#rm -rf ./tmp/*
-#rm -rf ./clips/*
+rm -rf ./tmp/*
+rm -rf ./clips/*
