@@ -3,26 +3,41 @@
 ## Description:
 Tools for automating editing Videos, specifically from Youtube into high quality shorts.
 Uses VOSK to subtitle using local resources. Can use chatgpt to edit videos or you can grab single clips. 
-Should allow easy manual edits somehow as well. 
+Should allow easy manual edits somehow as well. git@github.com:TylerGilman/vid-generator.git
 
-## Installation Instructions:
-Include detailed instructions on how to set up and install your project. This should cover any prerequisites, dependencies, and step-by-step instructions to get the project running.
+## Requirements:
+ffmpeg
+pyTube
+Vosk 
+
+#### 
+Vosk - Download model https://alphacephei.com/vosk/models
 
 ## Usage:
 1. Clone directory
 
 2. Create virtual machine and install required packages
 python3 -m venv .venv 
-pip install whatava you dont have idk
 
-3. Set OpenAI key as ENV var (only necessary for fullrun.sh)
+
+4. Set OpenAI key as ENV var (only necessary for fullrun.sh)
 export OPENAI_API_KEY="API-KEY"
 
-4. Enter ClipTools
-cd Cliptools
-6. Run scripts singleclip.sh or fullrun.sh 
-### fullrun.sh 
-./core/fullrun.sh "YOUTUBE URL" "Video Title" "OUTPUT PATH"
+## These can be easily put together
+5. Download Videos (could be combined but resolution is a different for each)
+1080_download_satisfyingclip.sh
+4k_download_satisfyingclip.sh
+
+
+## Finish 
+6. Create Final Video
+redditstorytovideo.sh
+
+or 
+
+youtube_to_short_no_cut.sh
+
+
 
 ## Contributing:
 Big Dan
@@ -34,7 +49,7 @@ There should be additional scripts to add titles and to add "subscribe" reminder
 Increasing video quality would be very nice. 
 
 
-## License: ??
+## License: haha
 
 ## API:
 ___
@@ -43,5 +58,4 @@ ___
 Email: tylersgiman@gmail.com
 
 ## Acknowledgments:
-Credit anyone whose code was used in the project, and any other acknowledgments.
 
